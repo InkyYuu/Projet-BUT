@@ -1,6 +1,7 @@
 # =========================== IMPORTS ================================
 from hashlib import blake2b
 from tkinter import CENTER
+from matplotlib.pyplot import text
 from upemtk import *
 from math import *
 from random import *
@@ -51,19 +52,43 @@ def pose_ronds (liste_boule_allie,liste_boule_ennemi, couleur_allie, couleur_enn
             print(('Faux'))
             #texte(0,0,"IMPOSSIBLE !", 'black', 'center')
         elif Cas3 == True :
-            #efface(liste_boule_ennemi[indice][3])
-            rayon_allie = liste_boule_ennemi[indice][2] - sqrt((liste_boule_ennemi[indice][0]-Ox)**2 + (liste_boule_ennemi[indice][1]-Oy)**2)
-            rayon_ennemi = liste_boule_ennemi[indice][2]-rayon_allie
-            cercle(Ox,Oy,rayon_allie,'black',couleur_allie,tag='boule'+couleur_allie+str(tour))
-            cercle(Ox,Oy,rayon_ennemi,'black',couleur_ennemi,tag='boule'+couleur_ennemi+str(tour))
-            liste_boule_ennemi.append([Ox,Oy,rayon_ennemi,'boule'+couleur_ennemi+str(tour)])
-            liste_boule_allie.append([Ox,Oy,rayon_allie,'boule'+couleur_allie+str(tour)])
+            efface(liste_boule_ennemi[indice][3])
+
+            vecteurU = [(Ox-liste_boule_ennemi[indice][0]),(Oy-liste_boule_ennemi[indice][1])]
+            normeU = sqrt((vecteurU[0]**2)+vecteurU[1]**2)
+
+            rayon_bouleclic = int(liste_boule_ennemi[indice][2]- normeU)
+            rayon_boulerestante = int(normeU)
+
+            NewOx = (liste_boule_ennemi[indice][0])-((rayon_bouleclic/rayon_boulerestante)*(Ox-liste_boule_ennemi[indice][0]))
+            NewOy = (liste_boule_ennemi[indice][1])-((rayon_bouleclic/rayon_boulerestante)*(Oy-liste_boule_ennemi[indice][1]))
+
+            cercle(NewOx,NewOy,rayon_boulerestante,'black',couleur_ennemi,tag='boule'+couleur_allie+str(tour))
+            cercle(Ox,Oy,rayon_bouleclic,'black',couleur_ennemi,tag='boule'+couleur_ennemi+str(tour))
+
+            liste_boule_ennemi.append([Ox,Oy,rayon_bouleclic,'boule'+couleur_ennemi+str(tour)+'0'])
+            liste_boule_ennemi.append([NewOx,NewOy,rayon_boulerestante,'boule'+couleur_allie+str(tour)+'1'])
             liste_boule_ennemi.pop(indice)
+
     mise_a_jour()
    
-def calcul_score ():
-    pass
+def calcul_score (lstJ1,lstJ2):
+    scoreJ1 = 0
+    scoreJ2 = 0
+    #CALCUL DES AIRES DES JOUEURS
+    for i in range(len(lstJ1)):
+        scoreJ1 = scoreJ1 + (pi*(lstJ1[i][2]))
+    for i in range(len(lstJ2)):
+        scoreJ2 = scoreJ2 + (pi*(lstJ2[i][2]))
+    print(scoreJ1,scoreJ2)
 
+    if scoreJ1 > scoreJ2 :
+        return 'Joueur1'
+    elif scoreJ1 == scoreJ2 :
+        return 'Egalité'
+    else :
+        return 'Joueur2'
+    
 def autre ():
     pass
 
@@ -79,8 +104,8 @@ variant_obstacles = False
 hauteurFenetre = 540
 largeurFenetre = 960
 # ========================= CODE PRINCIPAL ===========================
-couleurJ1 = choixcouleur(300,300)
-couleurJ2 = choixcouleur(300,300)
+couleurJ1 = 'red' #choixcouleur(300,300)
+couleurJ2 = 'blue'#choixcouleur(300,300)
 cree_fenetre(largeurFenetre, hauteurFenetre)
 tour = 0
 lst_boule_J1 = []
@@ -94,3 +119,7 @@ while victoire != True :
     tour += 1
     if tour == 5 :
         victoire = True
+gagnant = calcul_score(lst_boule_J1,lst_boule_J2)
+print ("Le gagnant est :",gagnant)
+#attente_clic()
+#ferme_fenetre()
